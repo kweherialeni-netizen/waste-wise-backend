@@ -11,6 +11,6 @@ class Reward extends Model
 
     protected $fillable = [
         'name',
-        'cost',
+        'points',
     ];
 }

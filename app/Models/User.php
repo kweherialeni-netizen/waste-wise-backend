@@ -2,48 +2,37 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;   // ← ADDED
+use Laravel\Sanctum\HasApiTokens; // Enables API token authentication
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;   // ← ADDED HasApiTokens
+    // Traits to add functionality to the User model
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Attributes that can be mass-assigned
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'name',     // User's full name
+        'email',    // User's email address
+        'password', // User's password
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Attributes that should be hidden when converting to arrays or JSON
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password',       // Hide password for security
+        'remember_token', // Hide remember token
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // Attribute casting for automatic type conversion
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at' => 'datetime', // Convert to Carbon instance
+            'password' => 'hashed',            // Automatically hash password
         ];
     }
+
+ 
 }
