@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class RecyclableItem extends Model
 {
-    /** @use HasFactory<\Database\Factories\RecyclableItemFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     * These are the fields you can create/update via the controller.
+     */
+    protected $fillable = [
+        'name',
+        'desc',
+        'img',
+    ];
 }

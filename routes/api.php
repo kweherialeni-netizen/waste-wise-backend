@@ -9,8 +9,14 @@ use App\Http\Controllers\RecyclableItemController;
 // -----------------------------
 // Public Authentication Routes
 // -----------------------------
-Route::post('/register', [AuthController::class, 'register']); // Register a new user
-Route::post('/login', [AuthController::class, 'login']);       // Login existing user
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// -----------------------------
+// Public Recyclable Items Routes
+// -----------------------------
+Route::get('/items', [RecyclableItemController::class, 'index']);       // List all items
+Route::get('/items/{id}', [RecyclableItemController::class, 'show']);   // Get single item
 
 // -----------------------------
 // Protected Routes (Sanctum)
@@ -18,41 +24,33 @@ Route::post('/login', [AuthController::class, 'login']);       // Login existing
 Route::middleware('auth:sanctum')->group(function () {
 
     // Logout
-    Route::post('/logout', [AuthController::class, 'logout']); // Logout current user
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-    // -----------------------------
-    // User Routes
-    // -----------------------------
-    Route::get('/users', [UserController::class, 'index']);      // List all users
-    Route::get('/users/{id}', [UserController::class, 'show']); // Get specific user
-    Route::post('/users', [UserController::class, 'store']);    // Create new user
-    Route::put('/users/{id}', [UserController::class, 'update']);   // Update user
-    Route::delete('/users/{id}', [UserController::class, 'destroy']); // Delete user
+    // User routes
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-    // -----------------------------
-    // Rewards Routes
-    // -----------------------------
-    Route::get('/rewards', [RewardController::class, 'index']);       // List all rewards
-    Route::post('/rewards', [RewardController::class, 'store']);      // Create new reward
-    Route::put('/rewards/{id}', [RewardController::class, 'update']); // Update reward
-    Route::delete('/rewards/{id}', [RewardController::class, 'destroy']); // Delete reward
+    // Rewards routes
+    Route::get('/rewards', [RewardController::class, 'index']);
+    Route::post('/rewards', [RewardController::class, 'store']);
+    Route::put('/rewards/{id}', [RewardController::class, 'update']);
+    Route::delete('/rewards/{id}', [RewardController::class, 'destroy']);
 
+    // Protected CRUD for items
+    Route::post('/items', [RecyclableItemController::class, 'store']);
+    Route::put('/items/{id}', [RecyclableItemController::class, 'update']);
+    Route::delete('/items/{id}', [RecyclableItemController::class, 'destroy']);
 
-    // Recyclable Items Routes
-    // -----------------------------
-    Route::get('/items', [RecyclableItemController::class, 'index']);       // List all items
-    Route::get('/items/{id}', [RecyclableItemController::class, 'show']);   // Get single item
-    Route::post('/items', [RecyclableItemController::class, 'store']);      // Create new item
-    Route::put('/items/{id}', [RecyclableItemController::class, 'update']); // Update item
-    Route::delete('/items/{id}', [RecyclableItemController::class, 'destroy']); // Delete item
+    // Recycle bottle
+    Route::post('/items/{id}/recycle', [RecyclableItemController::class, 'recycle']);
 
-    // -----------------------------
-    // Admin-only Routes
-    // -----------------------------
+    // Admin-only routes
     Route::middleware('admin')->group(function () {
         Route::get('/admin/dashboard', function () {
-            return response()->json(['message' => 'Admin Access Granted']); // Example admin route
+            return response()->json(['message' => 'Admin Access Granted']);
         });
     });
-
 });

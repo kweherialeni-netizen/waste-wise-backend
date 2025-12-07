@@ -5,34 +5,47 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // Enables API token authentication
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    // Traits to add functionality to the User model
     use HasApiTokens, HasFactory, Notifiable;
 
-    // Attributes that can be mass-assigned
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
-        'name',     // User's full name
-        'email',    // User's email address
-        'password', // User's password
+        'name',
+        'email',
+        'password',
+        'points', // make sure this column exists in your users table
     ];
 
-    // Attributes that should be hidden when converting to arrays or JSON
+    /**
+     * The attributes that should be hidden for arrays or JSON.
+     */
     protected $hidden = [
-        'password',       // Hide password for security
-        'remember_token', // Hide remember token
+        'password',
+        'remember_token',
     ];
 
-    // Attribute casting for automatic type conversion
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime', // Convert to Carbon instance
-            'password' => 'hashed',            // Automatically hash password
-        ];
-    }
+    /**
+     * Attribute casting for automatic type conversion.
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
- 
+    /**
+     * Add points to the user.
+     *
+     * @param int $points
+     * @return void
+     */
+    public function addPoints(int $points): void
+    {
+        $this->points += $points;
+        $this->save();
+    }
 }
