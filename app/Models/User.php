@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -26,12 +27,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',    // include role for assignment
+        'role',
         'points',
     ];
 
     /**
-     * The attributes that should be hidden for arrays or JSON.
+     * Hidden attributes for arrays or JSON.
      */
     protected $hidden = [
         'password',
@@ -39,7 +40,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Attribute casting for automatic type conversion.
+     * Attribute casting.
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -48,18 +49,22 @@ class User extends Authenticatable
 
     /**
      * Add points to the user.
-     *
-     * @param int $points
-     * @return void
      */
     public function addPoints(int $points): void
     {
-        $this->points += $points;
-        $this->save();
+        $this->increment('points', $points);
     }
 
     /**
-     * Helper methods for checking roles.
+     * Remove points from the user.
+     */
+    public function removePoints(int $points): void
+    {
+        $this->decrement('points', $points);
+    }
+
+    /**
+     * Role helpers.
      */
     public function isAdmin(): bool
     {
@@ -74,5 +79,21 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Transactions where the user is the customer.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Transactions processed by this employee.
+     */
+    public function processedTransactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'employee_id');
     }
 }

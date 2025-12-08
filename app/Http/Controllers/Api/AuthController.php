@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -10,7 +11,9 @@ use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
-    // Register a new user
+    /**
+     * Register a new user and create an initial transaction.
+     */
     public function register(Request $request)
     {
         // Validate incoming request data
@@ -29,6 +32,14 @@ class AuthController extends Controller
         // Create the user record in the database
         $user = User::create($validatedData);
 
+        // Create an initial transaction for the new user
+        Transaction::create([
+            'user_id' => $user->id,
+            'points_change' => 0, // starting points (can adjust if you want initial reward)
+            'type' => 'earned',
+            'description' => 'Initial points on registration'
+        ]);
+
         // Create a personal access token for the new user
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -40,7 +51,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Login a user and create a token
+    /**
+     * Login a user and create a token.
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -66,7 +79,9 @@ class AuthController extends Controller
         ], 200);
     }
 
-    // Logout the authenticated user
+    /**
+     * Logout the authenticated user.
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
