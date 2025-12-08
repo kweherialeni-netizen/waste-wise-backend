@@ -12,13 +12,22 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
+     * Default attribute values for new users.
+     */
+    protected $attributes = [
+        'role' => 'user',   // default role
+        'points' => 0,      // default points
+    ];
+
+    /**
      * The attributes that are mass assignable.
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'points', // make sure this column exists in your users table
+        'role',    // include role for assignment
+        'points',
     ];
 
     /**
@@ -47,5 +56,23 @@ class User extends Authenticatable
     {
         $this->points += $points;
         $this->save();
+    }
+
+    /**
+     * Helper methods for checking roles.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
     }
 }
