@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\RecyclableItem;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -51,53 +50,33 @@ class RecyclableItemController extends Controller
     }
 
     /**
-     * Employee records a recycling transaction.
-     * Both the customer and employee earn points.
+     * User records a recycling transaction.
+     * Only the logged-in user earns points.
      */
     public function recycle(Request $request, $id): JsonResponse
     {
-        $customer = Auth::user(); // The user recycling the item
-        $employeeId = $request->input('employee_id'); // Employee recording the transaction
-
-        if (!$employeeId) {
-            return response()->json([
-                'message' => 'Employee ID is required to confirm the transaction.'
-            ], 422);
-        }
-
-        $employee = User::find($employeeId);
-
-        if (!$employee || !$employee->isEmployee()) {
-            return response()->json([
-                'message' => 'Invalid employee.'
-            ], 422);
-        }
+        $user = Auth::user(); // The logged-in user
 
         try {
             $item = RecyclableItem::findOrFail($id);
             $pointsEarned = $item->points ?? 5; // Default points if not set
 
-            DB::transaction(function () use ($customer, $employee, $pointsEarned, $item) {
-                // Add points to customer
-                $customer->addPoints($pointsEarned);
-
-                // Add points to employee for processing
-                $employee->addPoints($pointsEarned);
+            DB::transaction(function () use ($user, $pointsEarned, $item) {
+                // Add points to user
+                $user->addPoints($pointsEarned);
 
                 // Record the transaction
                 Transaction::create([
-                    'user_id' => $customer->id,
-                    'employee_id' => $employee->id,
+                    'user_id' => $user->id,
                     'points_change' => $pointsEarned,
                     'type' => 'earned',
-                    'description' => "Recycled item: {$item->name} confirmed by {$employee->name}"
+                    'description' => "Recycled item: {$item->name}"
                 ]);
             });
 
             return response()->json([
-                'message' => "You recycled '{$item->name}' and earned {$pointsEarned} points! Confirmed by employee {$employee->name}.",
-                'user_points' => $customer->points,
-                'employee_points' => $employee->points
+                'message' => "You recycled '{$item->name}' and earned {$pointsEarned} points!",
+                'user_points' => $user->points
             ], 200);
 
         } catch (\Exception $e) {
