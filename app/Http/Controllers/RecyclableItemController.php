@@ -50,24 +50,25 @@ class RecyclableItemController extends Controller
     }
 
     /**
-     * User records a recycling transaction.
-     * Only the logged-in user earns points.
+     * Record a recycling transaction.
+     * Only the customer earns points.
      */
     public function recycle(Request $request, $id): JsonResponse
     {
-        $user = Auth::user(); // The logged-in user
-
         try {
+            $customer = Auth::user(); // Logged-in customer
             $item = RecyclableItem::findOrFail($id);
-            $pointsEarned = $item->points ?? 5; // Default points if not set
+            $pointsEarned = $item->points ?? 5;
 
-            DB::transaction(function () use ($user, $pointsEarned, $item) {
-                // Add points to user
-                $user->addPoints($pointsEarned);
+            DB::transaction(function () use ($customer, $pointsEarned, $item) {
 
-                // Record the transaction
+                // Add points to customer
+                $customer->addPoints($pointsEarned);
+
+                // Record the transaction (no employee)
                 Transaction::create([
-                    'user_id' => $user->id,
+                    'user_id' => $customer->id,
+                    'employee_id' => null,
                     'points_change' => $pointsEarned,
                     'type' => 'earned',
                     'description' => "Recycled item: {$item->name}"
@@ -76,7 +77,7 @@ class RecyclableItemController extends Controller
 
             return response()->json([
                 'message' => "You recycled '{$item->name}' and earned {$pointsEarned} points!",
-                'user_points' => $user->points
+                'user_points' => $customer->points
             ], 200);
 
         } catch (\Exception $e) {
